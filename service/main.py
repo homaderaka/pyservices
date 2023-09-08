@@ -1,10 +1,16 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from starlette.middleware.cors import CORSMiddleware
+
 from middleware import JSONMiddleware
 import uvicorn
 import repo
 from dbconfig import DBConfig
 
+origins = [
+    "http://localhost",
+    "http://localhost:8000",
+]
 
 class UserHandler:
     def __init__(self, app, repo: repo.Repository):
@@ -20,7 +26,15 @@ class UserCredentials(BaseModel):
 
 # Create a FastAPI app instance
 app = FastAPI()
-app.add_middleware(JSONMiddleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# app.add_middleware(JSONMiddleware)
 
 db_config = DBConfig()
 
@@ -36,6 +50,7 @@ uh = UserHandler(app, userRepo)
 def create_user(user_data: UserCredentials):
     userRepo.create_user(user_data)
     return {"message": "User created successfully"}
+
 
 # Define a route to get users
 @app.get("/user/get/all")
