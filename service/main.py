@@ -1,0 +1,86 @@
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from middleware import JSONMiddleware
+import uvicorn
+import repo
+from dbconfig import DBConfig
+
+
+class UserHandler:
+    def __init__(self, app, repo: repo.Repository):
+        self.app = app
+        self.repo = repo
+
+
+# Define a Pydantic model for user credentials
+class UserCredentials(BaseModel):
+    username: str
+    password: str
+
+
+# Create a FastAPI app instance
+app = FastAPI()
+app.add_middleware(JSONMiddleware)
+
+db_config = DBConfig()
+
+# Create an instance of the 'Repository' class from the 'repo' module
+userRepo = repo.Repository(db_config)
+
+# Create an instance of the 'UserHandler' class, passing the app and the repository instance
+uh = UserHandler(app, userRepo)
+
+
+# Define a route to create a new user
+@app.post("/user/create")
+def create_user(user_data: UserCredentials):
+    new_user = {'username': user_data.username, 'password': user_data.password}
+    userRepo.create_user(new_user)
+    return {"message": "User created successfully"}
+
+
+# Define a route to get user information by username
+@app.get("/user/get/id/{id}")
+def get_user_by_username(id: str):
+    user, err = userRepo.get_user_by_id(id)
+    if err is not None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user[0]
+
+
+# Define a route to get user information by username
+@app.get("/user/get/username/{username}")
+def get_user_by_username(username: str):
+    user, err = userRepo.get_user_by_username(username)
+    if err is not None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user[0]
+
+
+# Define a route to update user information by username
+@app.put("/user/update/{username}")
+def update_user(username: str, updated_user_data: UserCredentials):
+    user = {'username': username, 'password': updated_user_data.password}
+    userRepo.update_user(user)
+    return {"message": "User updated successfully"}
+
+
+# Define a route to delete a user by username
+@app.delete("/user/delete/{username}")
+def delete_user(username: str):
+    userRepo.delete_user(username)
+    return {"message": "User deleted successfully"}
+
+
+# Define a route to authenticate a user
+@app.post("/user/auth")
+def auth_user(credentials: UserCredentials):
+    ok = userRepo.auth_user(credentials)
+    if not ok:
+        raise HTTPException(status_code=401, detail="Authentication failed")
+    return {"message": "User is authenticated"}
+
+
+# Run the FastAPI app using uvicorn
+if __name__ == '__main__':
+    uvicorn.run(app, host="0.0.0.0", port=8000)
