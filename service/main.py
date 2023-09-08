@@ -70,6 +70,7 @@ def get_user_by_username(username: str):
 # Define a route to update user information by username
 @app.put("/user/update/{username}")
 def update_user(username: str, updated_user_data: UserCredentials):
+    # TODO: add update check
     user = {'username': username, 'password': updated_user_data.password}
     userRepo.update_user(user)
     return {"message": "User updated successfully"}
@@ -78,6 +79,7 @@ def update_user(username: str, updated_user_data: UserCredentials):
 # Define a route to delete a user by username
 @app.delete("/user/delete/id/{id}")
 def delete_user(id: str):
+    # TODO: add deletion check
     userRepo.delete_user(id)
     return {"message": "User deleted successfully"}
 
