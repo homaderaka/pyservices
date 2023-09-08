@@ -11,7 +11,7 @@
 2. Клонируйте этот репозиторий на вашем компьютере:
 
     ```bash
-    git clone https://github.com/homaderaka0stash/pyservices
+    git clone https://github.com/homaderaka/pyservices
     ```
 
 3. Перейдите в каталог с репозиторием:
