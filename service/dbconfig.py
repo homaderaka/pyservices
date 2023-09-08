@@ -8,6 +8,7 @@ class DBConfig:
         self.username = os.getenv('DB_USER')
         self.password = os.getenv('DB_PASSWORD')
         self.db = os.getenv('DB_NAME')
+        self.salt = os.getenv('SALT')
         self.__validate()
 
     def __validate(self):

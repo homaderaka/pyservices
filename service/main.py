@@ -34,18 +34,28 @@ uh = UserHandler(app, userRepo)
 # Define a route to create a new user
 @app.post("/user/create")
 def create_user(user_data: UserCredentials):
-    new_user = {'username': user_data.username, 'password': user_data.password}
-    userRepo.create_user(new_user)
+    userRepo.create_user(user_data)
     return {"message": "User created successfully"}
+
+# Define a route to get users
+@app.get("/user/get/all")
+def get_user_by_username():
+    users, err = userRepo.get_users()
+    if err is not None:
+        raise HTTPException(status_code=500, detail=err)
+    return users
 
 
 # Define a route to get user information by username
 @app.get("/user/get/id/{id}")
-def get_user_by_username(id: str):
+def get_user_by_id(id: str):
     user, err = userRepo.get_user_by_id(id)
     if err is not None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user[0]
+        print('failed to get_user_by_username:', str(err))
+        if type(err) is repo.EntityNotFound:
+            raise HTTPException(status_code=404, detail=str(err))
+        raise HTTPException(status_code=500)
+    return user
 
 
 # Define a route to get user information by username
@@ -54,7 +64,7 @@ def get_user_by_username(username: str):
     user, err = userRepo.get_user_by_username(username)
     if err is not None:
         raise HTTPException(status_code=404, detail="User not found")
-    return user[0]
+    return user
 
 
 # Define a route to update user information by username
@@ -66,9 +76,9 @@ def update_user(username: str, updated_user_data: UserCredentials):
 
 
 # Define a route to delete a user by username
-@app.delete("/user/delete/{username}")
-def delete_user(username: str):
-    userRepo.delete_user(username)
+@app.delete("/user/delete/id/{id}")
+def delete_user(id: str):
+    userRepo.delete_user(id)
     return {"message": "User deleted successfully"}
 
 

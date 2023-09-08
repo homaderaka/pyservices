@@ -14,7 +14,7 @@ grant all privileges on usersDB.* to 'user'@'%';
 -- Create the 'users' table
 create table if not exists users (
     id int not null auto_increment,
-    name varchar(20) not null,
+    name varchar(20) not null unique,
     passwordHash varchar(128) not null,
     primary key (id)
 );
