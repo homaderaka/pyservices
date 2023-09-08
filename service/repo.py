@@ -24,7 +24,7 @@ class Repository:
             ph = PasswordHasher()
             pwd_hash = ph.hash(user_data.password)
             password = user_data.password
-            ph = pwd_hash
+            ph = pwd_hash # TODO: change to hash
             self.__db.query(f"SELECT * FROM users WHERE name = '{user_data.username}' AND passwordHash = '{password}'")
             result = self.__db.store_result()
             row = result.fetch_row()
@@ -43,7 +43,7 @@ class Repository:
             password = user_data.password
             ph = PasswordHasher()
             pwd_hash = ph.hash(user_data.password)
-            ph = pwd_hash
+            ph = pwd_hash # TODO: change to hash
             self.__db.query(
                 f"INSERT INTO users (name, passwordHash) VALUES ('{user_data.username}', '{password}')"
             )

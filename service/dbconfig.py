@@ -3,12 +3,11 @@ import os
 
 class DBConfig:
     def __init__(self):
-        self.host = os.getenv('HOST')
-        self.port = os.getenv('PORT')
+        self.host = os.getenv('DB_HOST')
+        self.port = os.getenv('DB_PORT')
         self.username = os.getenv('DB_USER')
         self.password = os.getenv('DB_PASSWORD')
         self.db = os.getenv('DB_NAME')
-        self.salt = os.getenv('SALT')
         self.__validate()
 
     def __validate(self):
