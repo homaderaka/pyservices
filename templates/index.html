@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Конвертер валют</title>
+    <link href="{{ url_for('static', path='/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <h1>Конвертер валют</h1>
+
+    <div>
+        <div class="inline-flex">
+            <input id="currencyAValue" type="number" value="1">
+            <div class="currency-cont">
+                <select class="currency" id="currencyA">
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <option value="GBP">GBP</option>
+                    <!-- Add more currency options as needed -->
+                </select>
+                <div class="delim"></div>
+            </div>
+        </div>
+
+        <div class="inline-flex">
+            <input id="currencyBValue" type="number">
+            <div>
+                <select class="currency" id="currencyB">
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <option value="GBP">GBP</option>
+                    <!-- Add more currency options as needed -->
+                </select>
+                <div class="delim"></div>
+            </div>
+        </div>
+
+
+    <button onclick="get_graph()">Get Graph</button>
+    <div id="graph"></div>
+
+    <script>
+        function get_graph() {
+            // Get the selected values from currencyA and currencyB dropdowns
+            const currencyA = document.getElementById('currencyA').value;
+            const currencyB = document.getElementById('currencyB').value;
+
+            // Construct the URL with query parameters
+            const url = `/plot?currency_a=${currencyA}&currency_b=${currencyB}`;
+
+            // Make a GET request to the constructed URL
+            fetch(url)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Failed to fetch data');
+                    }
+                })
+                .then(data => {
+                    // Get the base64 encoded image data from the JSON response
+                    const imageData = data.image;
+
+                    // Create an <img> element and set its src attribute to display the image
+                    const imgElement = document.createElement('img');
+                    imgElement.src = 'data:image/png;base64,' + imageData;
+
+                    // Clear the previous content of the "graph" element
+                    const graphElement = document.getElementById('graph');
+                    graphElement.innerHTML = '';
+
+                    // Append the <img> element to the "graph" element
+                    graphElement.appendChild(imgElement);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    </script>
+</body>
+</html>
