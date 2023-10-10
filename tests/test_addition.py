@@ -20,7 +20,6 @@ class TestAddition(unittest.TestCase):
     # Test case to check if addition works with zero
     def test_addition_with_zero(self):
         self.assertEqual(add(0, 5), 5)  # Assert that 0 + 5 = 5
-        self.assertEqual(True, False)
 
 
 # Define a test suite
