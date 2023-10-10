@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from starlette.staticfiles import StaticFiles
 
-from app import Server
+from src.app.app import Server
 
 
 app = FastAPI()

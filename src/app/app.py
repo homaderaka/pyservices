@@ -1,13 +1,13 @@
-import datetime
 import random
 
 from fastapi import APIRouter, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 
-import matplotlib.pyplot as plt
 import base64
 from io import BytesIO
+
+from src.plotter.plotter import Plotter
 
 
 class Stub:
@@ -16,31 +16,12 @@ class Stub:
         self.conversion_rate = 60  # Constant conversion rate of 60
 
     def to(self, currency_b):
-        values = 5
+        values = 6
 
         # Generate random data for currency_b based on conversion rate
         converted_data = [random.random() * self.conversion_rate for x in range(values)]
 
-        # Generate date labels for x-axis (assumed one data point per day)
-        start_date = datetime.date(2023, 1, 1)
-        date_labels = [start_date + datetime.timedelta(days=i) for i in range(values)]
-
-        # Create a figure
-        fig, ax = plt.subplots()
-
-        # Plot the converted data
-        ax.plot(date_labels, converted_data, label=f'{currency_b} Data')
-
-        # Set labels and title
-        ax.set_xlabel('Date')
-        ax.set_ylabel('Value')
-        ax.set_title('Currency Conversion Stub Graph')
-
-        # Rotate x-axis labels for better readability
-        plt.xticks(rotation=45)
-
-        # Add a legend
-        ax.legend()
+        fig = Plotter(converted_data, converted_data).get_plot()
 
         return fig
 
