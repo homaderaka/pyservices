@@ -1,4 +1,5 @@
 from behave import given, when, then
+from src.plotter.plotter import Plotter
 
 
 @given('there is a Plotter object')
