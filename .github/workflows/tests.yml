@@ -1,4 +1,4 @@
-name: Run steps
+name: Run tests
 
 on:
   push:
@@ -28,12 +28,12 @@ jobs:
           pip install -r requirements.txt
         working-directory: .
 
-      - name: Run unit steps
+      - name: Run unit tests
         run: |
           python -m unittest discover tests
         working-directory: .
 
-      - name: Run bdd steps
+      - name: Run bdd tests
         run: |
           behave .\tests\bdd\features
         working-directory: .
