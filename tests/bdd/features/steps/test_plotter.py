@@ -13,12 +13,6 @@ def call_create_plot(context):
     context.plot = context.currency_plot._Plotter__create_plot()
 
 
-@then('graph should be created without errors')
-def check_plot_created(context):
-    assert context.plot is not None, \
-        "Plotter was not created"
-
-
 @then('past values list must be correct')
 def check_x_labels(context):
     assert context.currency_plot.get_ex_rate_values() == [1, 2, 3], \

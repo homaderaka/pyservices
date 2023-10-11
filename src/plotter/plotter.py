@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 from scipy.interpolate import interp1d
 import numpy as np
-from plotter_settings import PlotterSettings
+from src.plotter.plotter_settings import PlotterSettings
 
 
 class Plotter:

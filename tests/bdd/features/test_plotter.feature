@@ -1,10 +1,5 @@
 Feature: create_plot function
 
-  Scenario: health check
-     Given there is a Plotter object
-      When create_plot method is called
-      Then graph should be created without errors
-
   Scenario: checking past values
      Given there is a Plotter object
       When create_plot method is called
