@@ -12,11 +12,8 @@
         <div class="inline-flex">
             <input id="currencyAValue" type="number" value="1">
             <div class="currency-cont">
-                <select class="currency" id="currencyA">
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
-                    <option value="GBP">GBP</option>
-                    <!-- Add more currency options as needed -->
+                <select class="currency" id="currencyA" >
+                    <option selected></option>
                 </select>
                 <div class="delim"></div>
             </div>
@@ -26,10 +23,7 @@
             <input id="currencyBValue" type="number">
             <div>
                 <select class="currency" id="currencyB">
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
-                    <option value="GBP">GBP</option>
-                    <!-- Add more currency options as needed -->
+                    <option></option>
                 </select>
                 <div class="delim"></div>
             </div>
@@ -38,8 +32,68 @@
 
     <button onclick="get_graph()">Get Graph</button>
     <div id="graph"></div>
+    </div>
 
     <script>
+
+        <!--   S-ss-sss-senpai. B-bbb-BAKA! Don't look!     -->
+        let currency_b_rate = 0;
+        let currencyNamesToCodes = {};
+        let currencyCodesToNames = {};
+        let currencies = {}
+        let lastAValue = '';
+        let lastBValue = '';
+
+        function get_currencies() {
+            // Send a GET request to the server endpoint that provides currency data
+            fetch('/currencies')
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Failed to fetch currency data');
+                    }
+                })
+                .then(data => {
+                     // Reverse the mapping from currency code to currency name
+                    for (const code in data) {
+                        currencyCodesToNames[code] = data[code];
+                    }
+
+                    // Reverse the mapping from currency code to currency name
+                    for (const code in data) {
+                        const name = data[code];
+                        currencyNamesToCodes[name] = code;
+                    }
+
+                    currencies = copy_map(currencyNamesToCodes)
+
+                    populate_with_options(currencies, '#currencyA', 1)
+                    populate_with_options(currencies, '#currencyB')
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function populate_with_options(m, elemID, selectedID=0) {
+             const currencyBDropdown = document.querySelectorAll(elemID);
+                    currencyBDropdown.forEach(select => {
+                        select.innerHTML = '';
+                        let cnt = 0
+                        for (const name in m) {
+                            const option = document.createElement('option');
+                            option.value = m[name];
+                            option.textContent = name;
+                            if (cnt === selectedID) {
+                                option.selected = true
+                            }
+                            cnt++
+                            select.appendChild(option);
+                        }
+                    });
+        }
+
         function get_graph() {
             // Get the selected values from currencyA and currencyB dropdowns
             const currencyA = document.getElementById('currencyA').value;
@@ -61,6 +115,9 @@
                     // Get the base64 encoded image data from the JSON response
                     const imageData = data.image;
 
+                    currency_b_rate = data.currency_b_rate;
+                    console.log(currency_b_rate)
+
                     // Create an <img> element and set its src attribute to display the image
                     const imgElement = document.createElement('img');
                     imgElement.src = 'data:image/png;base64,' + imageData;
@@ -76,6 +133,51 @@
                     console.error('Error:', error);
                 });
         }
+
+        function copy_map(m) {
+            let newMap = {}
+            for (const code in m) {
+                newMap[code] = m[code];
+            }
+            return newMap
+        }
+
+        // implement some logic currencies swapped if user selects equal currencyCodesToNames[selectedCurrency]
+        // on #currencyA and #currencyB
+         // Attach an event listener to the #currencyA dropdown
+        const currencyADropdown = document.getElementById('currencyA');
+        // Attach an event listener to the #currencyA dropdown
+        const currencyBDropdown = document.getElementById('currencyB');
+
+        currencyADropdown.addEventListener('click', function () {
+            lastAValue = currencyADropdown.value;
+            // console.log('clicked on a')
+        })
+
+        currencyBDropdown.addEventListener('click', function () {
+            lastBValue = currencyBDropdown.value;
+            // console.log('clicked on b')
+        })
+
+        currencyADropdown.addEventListener('change', function() {
+            const selectedCurrency = currencyADropdown.value;
+            // console.log('Selected currency in #currencyA:', selectedCurrency);
+            if (selectedCurrency === currencyBDropdown.value) {
+                currencyBDropdown.value = lastAValue
+                // console.log('switching b value to:', lastAValue);
+            }
+        });
+
+        currencyBDropdown.addEventListener('change', function() {
+            const selectedCurrency = currencyBDropdown.value;
+            // console.log('Selected currency in #currencyB:', selectedCurrency);
+
+            if (selectedCurrency === currencyADropdown.value) {
+                currencyADropdown.value = lastBValue
+                // console.log('switching a value to:', lastBValue);
+            }
+        });
+        get_currencies()
     </script>
 </body>
 </html>

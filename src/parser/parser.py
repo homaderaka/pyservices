@@ -2,11 +2,12 @@ from bs4 import BeautifulSoup
 import requests
 import datetime
 
+import asyncio
+import aiohttp
 
 class Parser:
     def __init__(self):
-        pass
-
+        self.exchange_rate_cache = {}
 
     def getCurrencyNames(self):
         url = 'http://cbr.ru/currency_base/daily/?UniDbQuery.Posted=True&UniDbQuery.To=10.10.2023'
@@ -28,58 +29,52 @@ class Parser:
                 names[key] = value
         return names
 
-    def getExchangeRate(self, currency1, currency2, date):
-        """
-        Parse relation between 2 given currencies from cbr.ru on given date and return it
-
-        :param currency1 (str): currency name in format RUB
-        :param currency2 (str): currency name in format RUB
-        :param date (str): string in format DD.MM.YYYY (12.08.2003)
-        :return result (float): relation between currency1 and currency2
-        """
+    async def fetch_exchange_rate(self, session, currency1, currency2, date):
         url = 'http://cbr.ru/currency_base/daily/?UniDbQuery.Posted=True&UniDbQuery.To=' + date
-        page = requests.get(url)
-        soup = BeautifulSoup(page.text, "html.parser")
-        currencies = soup.findAll('tr')
-        exchanges = {}
-        exchanges['RUB'] = 1
+        async with session.get(url) as response:
+            page = await response.text()
+            soup = BeautifulSoup(page, "html.parser")
+            currencies = soup.findAll('tr')
+            exchanges = {}
+            exchanges['RUB'] = 1
 
-        for currency in currencies:
-            data = currency.findAll('td')
-            # data[0] - some code
-            # data[1] - currency name in format RUB
-            # data[2] - currency amount
-            # data[3] - currency full name
-            # data[4] - currency relation to ruble
-            if len(data) == 5:
-                key = data[1].text
-                value = float(data[4].text.replace(',', '.')) / float(data[2].text)
-                exchanges[key] = value
+            for currency in currencies:
+                data = currency.findAll('td')
+                if len(data) == 5:
+                    key = data[1].text
+                    value = float(data[4].text.replace(',', '.')) / float(data[2].text)
+                    exchanges[key] = value
 
-        result = exchanges[currency1] / exchanges[currency2]
-        return result
+            result = exchanges[currency1] / exchanges[currency2]
 
+            # Store the result in the cache
+            cache_key = (currency1, currency2, date)
+            self.exchange_rate_cache[cache_key] = result
 
-    def getExchangeRates(self, currency1, currency2, days):
-        """
-        Parse relations between 2 given currencies from cbr.ru for {days} previous days
+            return result
 
-        :param currency1 (str): currency name in format RUB
-        :param currency2 (str): currency name in format RUB
-        :param days (int): size of array of returned relations between currencies
-        :return exchangeRates (list[float]): relations between currency1 and currency2 for {days} previous days
-        """
+    async def getExchangeRate(self, currency1, currency2, date):
+        cache_key = (currency1, currency2, date)
+        if cache_key in self.exchange_rate_cache:
+            return self.exchange_rate_cache[cache_key]
+
+        async with aiohttp.ClientSession() as session:
+            result = await self.fetch_exchange_rate(session, currency1, currency2, date)
+            return result
+
+    async def getExchangeRates(self, currency1, currency2, days):
         today = datetime.datetime.now()
-        exchangeRates = []
+        tasks = []
+
         for i in range(days):
             substraction = datetime.timedelta(days=i)
             date = self.parseDate(today - substraction)
-            exchangeRate = self.getExchangeRate(currency1, currency2, date)
-            exchangeRates.append(exchangeRate)
+            task = self.getExchangeRate(currency1, currency2, date)
+            tasks.append(task)
+
+        exchangeRates = await asyncio.gather(*tasks)
         exchangeRates.reverse()
         return exchangeRates
-
-
 
     def parseDate(self, date):
         return date.strftime("%d.%m.%Y")

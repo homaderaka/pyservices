@@ -1,3 +1,5 @@
+import asyncio
+
 from behave import given, when, then
 
 from src.parser.parser import Parser
@@ -45,7 +47,7 @@ def check_dictionary(context):
 
 @when("getExchangeRates method is called with variables 'USD', 'RUB' and 7")
 def call_get_exchange_rates(context):
-    context.exchange_rates = context.parser.getExchangeRates('USD', 'RUB', 7)
+    context.exchange_rates = asyncio.run(context.parser.getExchangeRates('USD', 'RUB', 7))
 
 
 @then('Have list of 7 exchange rates for 7 days')
