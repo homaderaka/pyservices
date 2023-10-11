@@ -1,6 +1,8 @@
 import unittest
 from datetime import datetime
 
+from src.plotter.plotter import Plotter
+
 
 class TestCurrencyPlot(unittest.TestCase):
 
