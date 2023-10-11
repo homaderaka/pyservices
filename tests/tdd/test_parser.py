@@ -26,14 +26,14 @@ class TestParser(unittest.TestCase):
         self.assertEqual(expected, result)
 
 
-    def test_parse_datetime_full_successfully(self):
+    def test_parse_datetime_partly_successfully(self):
         parser = Parser()
         result = parser.parseDate(datetime.datetime(2023,10,10))
         expected = "10.10.2023"
         self.assertEqual(expected, result)
 
 
-    def test_parse_datetime_partly_successfully(self):
+    def test_parse_datetime_full_successfully(self):
         parser = Parser()
         result = parser.parseDate(datetime.datetime(2023,10,10,10,10,10))
         expected = "10.10.2023"
