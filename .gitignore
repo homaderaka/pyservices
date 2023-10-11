@@ -28,3 +28,6 @@ archive.zip
 
 # macOS
 .DS_Store
+.idea/misc.xml
+.idea/misc.xml
+.idea/pyservices.iml
