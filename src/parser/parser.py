@@ -46,5 +46,6 @@ class Parser:
     def getExchangeRates(self, currency1, currency2, days):
         pass
 
+
     def parseDate(self, date):
         return date.strftime("%d.%m.%Y")
