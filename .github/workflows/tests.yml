@@ -35,5 +35,5 @@ jobs:
 
       - name: Run bdd tests
         run: |
-          behave .\tests\bdd\features
+          behave tests/bdd/features
         working-directory: .
