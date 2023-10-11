@@ -4,7 +4,7 @@ from datetime import datetime
 from src.plotter.plotter import Plotter
 
 
-class TestCurrencyPlot(unittest.TestCase):
+class TestPlotter(unittest.TestCase):
 
     def test_generate_xticks(self):
         currency_plot = Plotter([1, 2, 3], [4, 5, 6])
