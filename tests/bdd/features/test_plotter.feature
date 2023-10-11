@@ -1,11 +1,11 @@
-Feature: create_plot function
+Feature: getCurrencyNames function
 
-  Scenario: checking past values
+  Scenario: checking currencies shortnames
      Given there is a Plotter object
       When create_plot method is called
       Then past values list must be correct
 
-  Scenario: checking future values
+  Scenario: checking currencies full names
      Given there is a Plotter object
       When create_plot method is called
       Then future predictions list must be correct
