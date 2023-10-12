@@ -63,7 +63,7 @@ class Server:
 
         exchange_rate7days = exchange_rate[-7:]
 
-        extrapolated_exchange_rate = self.predictor.extrapolate_currency_rate(exchange_rate)[:7]
+        extrapolated_exchange_rate = self.predictor.extrapolate_currency_rate(exchange_rate7days.copy())[7:]
         print('Server.__plot_graph.predictor.extrapolate_currency_rate: got a prediction, took: {:.2f} seconds'.format(
             time.time() - start_time))
         start_time = time.time()  # Update the start time
