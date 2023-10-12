@@ -146,6 +146,12 @@
                     graphElement.appendChild(imgElement);
                     console.log('got graph');
 
+                    // if (firstRun) {
+                    //     console.log(`setting up initial b value: ${currency_b_rate}`) // 0
+                    //     let roundedValue = Math.round((currency_b_rate + Number.EPSILON) * 100) / 100 // 0
+                    //     currencyBValue.value = roundedValue.toString()
+                    //     firstRun = false
+                    // }
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -203,7 +209,6 @@
                 // console.log('switching a value to:', lastBValue);
             }
             get_graph()
-
         });
 
 
@@ -226,6 +231,11 @@
           }
 
             let numberValue = Number(inputValue)
+            if (numberValue < 0) {
+                event.target.value = '0'
+                return;
+            }
+
             let convertedValue = numberValue * currency_b_rate
             let roundedValue = Math.round((convertedValue + Number.EPSILON) * 100) / 100
             currencyBValue.value = roundedValue.toString()
@@ -238,23 +248,15 @@
           }
 
             let numberValue = Number(inputValue)
+            if (numberValue < 0) {
+                event.target.value = '0'
+                return
+            }
+
             let convertedValue = numberValue / currency_b_rate
             let roundedValue = Math.round((convertedValue + Number.EPSILON) * 100) / 100
             currencyAValue.value = roundedValue.toString()
         },false);
-
-        function roundNumber(num, scale) {
-          if(!("" + num).includes("e")) {
-            return +(Math.round(num + "e+" + scale)  + "e-" + scale);
-          } else {
-            var arr = ("" + num).split("e");
-            var sig = ""
-            if(+arr[1] + scale > 0) {
-              sig = "+";
-            }
-            return +(Math.round(+arr[0] + "e" + sig + (+arr[1] + scale)) + "e-" + scale);
-          }
-        }
 
         // Function that initializes graph/currency values
         async function initializeCurrencyExchange() {
@@ -285,7 +287,8 @@
                     console.log('got currencies');
                 })
                 .then(r => {
-                    get_graph()
+                    get_graph() // when it async completes currency_b_rate is
+                    console.log(currency_b_rate) // 0
                 })
 
         }
