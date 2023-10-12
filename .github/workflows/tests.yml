@@ -32,3 +32,8 @@ jobs:
         run: |
           python -m unittest discover tests
         working-directory: .
+
+      - name: Run bdd tests
+        run: |
+          behave tests/bdd/features
+        working-directory: .
