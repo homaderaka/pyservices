@@ -29,8 +29,6 @@
             </div>
         </div>
 
-
-    <button onclick="get_graph()">Get Graph</button>
     <div id="graph"></div>
     </div>
 
@@ -43,10 +41,19 @@
         let currencies = {}
         let lastAValue = '';
         let lastBValue = '';
+        let currency_a_value_active = false;
+        let currency_b_value_active = false;
 
+        const currencyAValue = document.getElementById('currencyAValue')
+        const currencyBValue = document.getElementById('currencyBValue')
+
+
+        function get_currencies_promise() {
+            return fetch('/currencies')
+        }
         function get_currencies() {
             // Send a GET request to the server endpoint that provides currency data
-            fetch('/currencies')
+            get_currencies_promise()
                 .then(response => {
                     if (response.ok) {
                         return response.json();
@@ -70,9 +77,11 @@
 
                     populate_with_options(currencies, '#currencyA', 1)
                     populate_with_options(currencies, '#currencyB')
+                    console.log('got currencies');
                 })
                 .catch(error => {
                     console.error('Error:', error);
+                    console.log('got currencies');
                 });
         }
 
@@ -86,6 +95,10 @@
                             option.value = m[name];
                             option.textContent = name;
                             if (cnt === selectedID) {
+                                if (elemID === `#currencyA`) {
+
+                                }
+
                                 option.selected = true
                             }
                             cnt++
@@ -94,16 +107,19 @@
                     });
         }
 
-        function get_graph() {
+        function get_graph_promise() {
             // Get the selected values from currencyA and currencyB dropdowns
             const currencyA = document.getElementById('currencyA').value;
             const currencyB = document.getElementById('currencyB').value;
 
             // Construct the URL with query parameters
             const url = `/plot?currency_a=${currencyA}&currency_b=${currencyB}`;
-
+            console.log(`fetching to ${url}`)
+            return fetch(url)
+        }
+        function get_graph() {
             // Make a GET request to the constructed URL
-            fetch(url)
+            get_graph_promise()
                 .then(response => {
                     if (response.ok) {
                         return response.json();
@@ -128,9 +144,12 @@
 
                     // Append the <img> element to the "graph" element
                     graphElement.appendChild(imgElement);
+                    console.log('got graph');
+
                 })
                 .catch(error => {
                     console.error('Error:', error);
+                    console.log('got graph');
                 });
         }
 
@@ -164,8 +183,12 @@
             // console.log('Selected currency in #currencyA:', selectedCurrency);
             if (selectedCurrency === currencyBDropdown.value) {
                 currencyBDropdown.value = lastAValue
+                let tmp = currencyAValue.value
+                currencyAValue.value = currencyBValue.value
+                currencyBValue.value = tmp
                 // console.log('switching b value to:', lastAValue);
             }
+            get_graph()
         });
 
         currencyBDropdown.addEventListener('change', function() {
@@ -174,10 +197,100 @@
 
             if (selectedCurrency === currencyADropdown.value) {
                 currencyADropdown.value = lastBValue
+                 let tmp = currencyAValue.value
+                currencyAValue.value = currencyBValue.value
+                currencyBValue.value = tmp
                 // console.log('switching a value to:', lastBValue);
             }
+            get_graph()
+
         });
-        get_currencies()
+
+
+        currencyAValue.addEventListener('change', function (event) {
+            console.log('currency a value is set to active')
+            currency_a_value_active = true
+            currency_b_value_active = false
+        })
+
+        currencyBValue.addEventListener('change', function (event) {
+            console.log('currency b value is set to active')
+            currency_a_value_active = false
+            currency_b_value_active = true
+        })
+        // Add an input event listener to the input field
+        currencyAValue.addEventListener("change", function(event) {
+          const inputValue = event.target.value;
+          if (inputValue === '' || currency_b_value_active) {
+              return
+          }
+
+            let numberValue = Number(inputValue)
+            let convertedValue = numberValue * currency_b_rate
+            let roundedValue = Math.round((convertedValue + Number.EPSILON) * 100) / 100
+            currencyBValue.value = roundedValue.toString()
+        }, false);
+
+        currencyBValue.addEventListener("change", function(event) {
+          const inputValue = event.target.value;
+          if (inputValue === '' || currency_a_value_active) {
+              return
+          }
+
+            let numberValue = Number(inputValue)
+            let convertedValue = numberValue / currency_b_rate
+            let roundedValue = Math.round((convertedValue + Number.EPSILON) * 100) / 100
+            currencyAValue.value = roundedValue.toString()
+        },false);
+
+        function roundNumber(num, scale) {
+          if(!("" + num).includes("e")) {
+            return +(Math.round(num + "e+" + scale)  + "e-" + scale);
+          } else {
+            var arr = ("" + num).split("e");
+            var sig = ""
+            if(+arr[1] + scale > 0) {
+              sig = "+";
+            }
+            return +(Math.round(+arr[0] + "e" + sig + (+arr[1] + scale)) + "e-" + scale);
+          }
+        }
+
+        // Function that initializes graph/currency values
+        async function initializeCurrencyExchange() {
+            get_currencies_promise()
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Failed to fetch currency data');
+                    }
+                })
+                .then(data => {
+                     // Reverse the mapping from currency code to currency name
+                    for (const code in data) {
+                        currencyCodesToNames[code] = data[code];
+                    }
+
+                    // Reverse the mapping from currency code to currency name
+                    for (const code in data) {
+                        const name = data[code];
+                        currencyNamesToCodes[name] = code;
+                    }
+
+                    currencies = copy_map(currencyNamesToCodes)
+
+                    populate_with_options(currencies, '#currencyA', 1)
+                    populate_with_options(currencies, '#currencyB')
+                    console.log('got currencies');
+                })
+                .then(r => {
+                    get_graph()
+                })
+
+        }
+        // Now, call the async function to start the initialization
+        initializeCurrencyExchange();
     </script>
 </body>
 </html>
